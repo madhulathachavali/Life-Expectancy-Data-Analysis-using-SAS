@@ -1,0 +1,84 @@
+/* Import CSV file using proc import */
+
+PROC IMPORT DATAFILE='/home/u61152431/Raw/LifeExpectancyData.csv'
+            OUT=data
+            DBMS=CSV
+            REPLACE;
+     GETNAMES=YES;
+     DATAROW=2;
+     OPTIONS VALIDVARNAME=V7;
+RUN;
+
+
+/* Explore the data */
+PROC CONTENTS data=data;
+RUN;
+
+PROC PRINT data=data(obs=10);
+RUN;
+
+/* Check for missing values */
+PROC MEANS DATA=data NMISS;
+RUN;
+
+/* Check unique values for variable: Status, Country */
+PROC FREQ DATA=data;
+     TABLES Status Country / NOCUM NOPERCENT;
+RUN;
+
+/* Visualize the data */
+PROC SGPLOT data=data;
+  scatter x=GDP y=Life_Expectancy / group=Country;
+  xaxis label='GDP per capita';
+  yaxis label='Life expectancy';
+  run;
+
+proc sgpanel  data=data;
+  panelby Status;
+  dot Life_Expectancy;
+run;
+
+/* Life_Expectancy by Country */
+proc sgpanel  data=data;
+  panelby Status Country;
+  dot Life_Expectancy;
+run;
+
+PROC means DATA=data median;
+class status;
+var Life_expectancy;
+RUN;
+
+/* Notes: 
+1. The life expectancy data varies across countries, with developed nations tending to exhibit higher life expectancies compared to developing countries which typically have lower life expectancies.
+2. The median life expectancy value is around 69 years for developing countries and approximately 78 years for developed nations. */
+
+/* Sort the data by country */
+proc sort data=data;
+  by Country;
+run;
+
+/* Transpose the data to make it suitable for a heatmap */
+proc transpose data=data out=life_expectancy_transpose;
+  by Country;
+  var Life_Expectancy;
+run;
+
+/* Plot the heatmap using the transposed data */
+proc sgplot data=life_expectancy_transpose;
+  heatmap x=_name_ y=Country / colorresponse=col1;
+run;
+
+
+/* Build model */
+PROC REG data=data;
+  model Life_Expectancy = GDP Schooling percentage_expenditure;
+  run;
+  
+/* Linear regression between 2 variables */
+
+PROC REG DATA=data;
+     MODEL Life_expectancy = Schooling;
+RUN;
+
+
