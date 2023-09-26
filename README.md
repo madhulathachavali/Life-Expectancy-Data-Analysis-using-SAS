@@ -1,2 +1,1 @@
 # Life Expectancy Data Analysis
-The analysis seeks to address several key questions regarding life expectancy, including the potential impact of various predicting factors, such as healthcare expenditure, infant and adult mortality rates, and lifestyle variables. Additionally, it aims to determine whether there is a correlation between life expectancy and a country's status, GDP, and other factors.
